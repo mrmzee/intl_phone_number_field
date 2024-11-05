@@ -4,11 +4,9 @@ library intl_phone_number_field;
 
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
-
 import 'models/country_code_model.dart';
 import 'models/country_config.dart';
 import 'models/dialog_config.dart';
@@ -34,7 +32,8 @@ class InternationalPhoneNumberInput extends StatefulWidget {
   final PhoneConfig phoneConfig;
   final CountryCodeModel initCountry;
   final dynamic Function(IntPhoneNumber number)? onInputChanged;
-  final double betweenPadding;
+  final Color? dividerColor;
+
   final MaskedInputFormatter? formatter;
   final List<TextInputFormatter> inputFormatters;
   final Future<String?> Function()? loadFromJson;
@@ -45,8 +44,8 @@ class InternationalPhoneNumberInput extends StatefulWidget {
       this.height = 60,
       this.inputFormatters = const [],
       CountryCodeModel? initCountry,
-      this.betweenPadding = 23,
       this.onInputChanged,
+      this.dividerColor,
       this.loadFromJson,
       this.formatter,
       this.validator,
@@ -58,8 +57,7 @@ class InternationalPhoneNumberInput extends StatefulWidget {
         controller = controller ?? TextEditingController(),
         countryConfig = countryConfig ?? CountryConfig(),
         initCountry = initCountry ??
-            CountryCodeModel(
-                name: "United States", dial_code: "+1", code: "US"),
+            CountryCodeModel(name: "Iran", dial_code: "+98", code: "IR"),
         phoneConfig = phoneConfig ?? PhoneConfig();
 
   @override
@@ -150,17 +148,87 @@ class _InternationalPhoneNumberInputState
         SizedBox(
           height: widget.height,
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // Expanded(
+            //     flex: 3,
+            //     child: SizedBox(
+            //       height: widget.height,
+            //       child: TextButton(
+            //         onPressed: () {
+            //           if (!widget.inactive && countries != null) {
+            //             showModalBottomSheet(
+            //                 shape: const RoundedRectangleBorder(
+            //                   borderRadius: BorderRadius.vertical(
+            //                     top: Radius.circular(30),
+            //                   ),
+            //                 ),
+            //                 barrierColor: Colors.black.withOpacity(0.6),
+            //                 isScrollControlled: true,
+            //                 backgroundColor:
+            //                     widget.dialogConfig.backgroundColor,
+            //                 context: context,
+            //                 builder: (context) {
+            //                   return SingleChildScrollView(
+            //                     child: CountryCodeBottomSheet(
+            //                       countries: countries!,
+            //                       selected: selected,
+            //                       onSelected: (countryCodeModel) {
+            //                         setState(() {
+            //                           selected = countryCodeModel;
+            //                         });
+            //                         if (widget.onInputChanged != null) {
+            //                           widget.onInputChanged!(IntPhoneNumber(
+            //                               code: selected.code,
+            //                               dial_code: selected.dial_code,
+            //                               number: widget.controller.text
+            //                                   .trimLeft()
+            //                                   .trimRight()));
+            //                         }
+            //                       },
+            //                       dialogConfig: widget.dialogConfig,
+            //                     ),
+            //                   );
+            //                 });
+            //           }
+            //         },
+            //         style: TextButton.styleFrom(
+            //           minimumSize: Size.zero,
+            //           padding: EdgeInsets.zero,
+            //           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            //         ),
+            //         child: Container(
+            //           width: double.infinity,
+            //           height: double.infinity,
+            //           decoration: widget.countryConfig.decoration,
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.center,
+            //             children: [
+            //               FlagView(
+            //                 countryCodeModel: selected,
+            //                 isFlat: widget.countryConfig.flatFlag,
+            //                 size: widget.countryConfig.flagSize,
+            //               ),
+            //               const SizedBox(width: 8),
+            //               Text(
+            //                 selected.dial_code,
+            //                 style: widget.countryConfig.textStyle,
+            //               )
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     )),
             Expanded(
-                flex: 10,
-                child: SizedBox(
-                  height: widget.height,
-                  child: TextButton(
-                    onPressed: () {
+                flex: 7,
+                child: RixaTextField(
+                  prefixIcon: GestureDetector(
+                    onTap: () {
                       if (!widget.inactive && countries != null) {
                         showModalBottomSheet(
                             shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(30))),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(30),
+                              ),
+                            ),
                             barrierColor: Colors.black.withOpacity(0.6),
                             isScrollControlled: true,
                             backgroundColor:
@@ -190,18 +258,12 @@ class _InternationalPhoneNumberInputState
                             });
                       }
                     },
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: EdgeInsets.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: widget.countryConfig.decoration,
+                    child: SizedBox(
+                      width: 120,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          const SizedBox(width: 8),
                           FlagView(
                             countryCodeModel: selected,
                             isFlat: widget.countryConfig.flatFlag,
@@ -211,16 +273,20 @@ class _InternationalPhoneNumberInputState
                           Text(
                             selected.dial_code,
                             style: widget.countryConfig.textStyle,
+                          ),
+                          const SizedBox(width: 8),
+                          VerticalDivider(
+                            endIndent: 12,
+                            indent: 12,
+                            thickness: 2,
+                            color: (widget.dividerColor != null)
+                                ? widget.dividerColor
+                                : Colors.black,
                           )
                         ],
                       ),
                     ),
                   ),
-                )),
-            SizedBox(width: widget.betweenPadding),
-            Expanded(
-                flex: 18,
-                child: RixaTextField(
                   hintText: widget.phoneConfig.hintText ?? "",
                   hintStyle: widget.phoneConfig.hintStyle,
                   textStyle: widget.phoneConfig.textStyle,

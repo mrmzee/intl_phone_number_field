@@ -128,7 +128,8 @@ class _CountryCodeBottomSheetState extends State<CountryCodeBottomSheet> {
   void search(String search) {
     searchCountries = mainCountries
         .where((element) =>
-            element.name.toLowerCase().contains(search.toLowerCase()))
+            element.name.toLowerCase().contains(search.toLowerCase()) ||
+            element.dial_code.contains(search))
         .toList();
     setState(() {});
   }
